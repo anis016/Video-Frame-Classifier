@@ -24,6 +24,9 @@ public class TinyYoloModel {
     private List<DetectedObject> predictedObjects;
     private HashMap<Integer, String> labels;
 
+    /**
+     * Initializes the new ComputationGraph instance and loads the model.
+     */
     private TinyYoloModel() {
         try {
             model = (ComputationGraph) new TinyYOLO().initPretrained();
@@ -35,11 +38,20 @@ public class TinyYoloModel {
 
     static final TinyYoloModel INSTANCE = new TinyYoloModel();
 
-    public static TinyYoloModel getINSTANCE() {
+    public static TinyYoloModel getInstance() {
         return INSTANCE;
     }
 
-    public void markWithBoundingBox(Mat file, int imageWidth, int imageHeight, boolean newBoundingBOx,String winName) throws Exception {
+    /**
+     * Marks the bounding box of the image.
+     * @param file matrix representations of the image
+     * @param imageWidth image width
+     * @param imageHeight image height
+     * @param newBoundingBox new bounding box is present
+     * @param windowName window name
+     * @throws Exception
+     */
+    public void markWithBoundingBox(Mat file, int imageWidth, int imageHeight, boolean newBoundingBox, String windowName) throws Exception {
         int width = 416;
         int height = 416;
         int gridWidth = 13;
@@ -47,18 +59,25 @@ public class TinyYoloModel {
         double detectionThreshold = 0.5;
 
         Yolo2OutputLayer outputLayer = (Yolo2OutputLayer) model.getOutputLayer(0);
-        if (newBoundingBOx) {
+        if (newBoundingBox) {
             INDArray indArray = prepareImage(file, width, height);
             INDArray results = model.outputSingle(indArray);
             predictedObjects = outputLayer.getPredictedObjects(results, detectionThreshold);
-            System.out.println("results = " + predictedObjects);
+            System.out.println("Results = " + predictedObjects);
             markWithBoundingBox(file, gridWidth, gridHeight, imageWidth, imageHeight);
         } else {
             markWithBoundingBox(file, gridWidth, gridHeight, imageWidth, imageHeight);
         }
-        imshow(winName, file);
+        imshow(windowName, file);
     }
 
+    /**
+     * Converts matrix into n-d array.
+     * @param file matrix representations of the image
+     * @param width image width
+     * @param height image height
+     * @throws IOException
+     */
     INDArray prepareImage(Mat file, int width, int height) throws IOException {
         NativeImageLoader loader = new NativeImageLoader(height, width, 3);
         ImagePreProcessingScaler imagePreProcessingScaler = new ImagePreProcessingScaler(0, 1);
@@ -67,6 +86,9 @@ public class TinyYoloModel {
         return indArray;
     }
 
+    /**
+     * Prepares the labels and puts in the hashmap.
+     */
     void prepareLabels() {
         if (labels == null) {
             String s = "aeroplane\n" + "bicycle\n" + "bird\n" + "boat\n" + "bottle\n" + "bus\n" + "car\n" +
@@ -81,6 +103,14 @@ public class TinyYoloModel {
         }
     }
 
+    /**
+     * Marks the bounding box of the image.
+     * @param file matrix representations of the image
+     * @param gridHeight grid width
+     * @param gridWidth grid height
+     * @param w image width
+     * @param h image height
+     */
     void markWithBoundingBox(Mat file, int gridWidth, int gridHeight, int w, int h) {
 
         if (predictedObjects == null) {
@@ -99,6 +129,11 @@ public class TinyYoloModel {
         }
     }
 
+    /**
+     * Removes non-max suppression when predicted more than one bounding box per object.
+     * @param detectedObjects list of predefined objects
+     * @param maxObjectDetect detected object
+     */
     static void removeObjectsIntersectingWithMax(ArrayList<DetectedObject> detectedObjects, DetectedObject maxObjectDetect) {
         double[] bottomRightXY1 = maxObjectDetect.getBottomRightXY();
         double[] topLeftXY1 = maxObjectDetect.getTopLeftXY();
@@ -129,6 +164,15 @@ public class TinyYoloModel {
         detectedObjects.removeAll(removeIntersectingObjects);
     }
 
+    /**
+     * Marks the bounding box of the image with label
+     * @param file matrix representations of the image
+     * @param gridHeight grid height
+     * @param gridWidth grid width
+     * @param w image width
+     * @param h image height
+     * @param obj detected object
+     */
     void markWithBoundingBox(Mat file, int gridWidth, int gridHeight, int w, int h, DetectedObject obj) {
 
         double[] xy1 = obj.getTopLeftXY();

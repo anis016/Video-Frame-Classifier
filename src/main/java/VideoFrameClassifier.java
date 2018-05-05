@@ -11,9 +11,15 @@ import static org.bytedeco.javacpp.opencv_highgui.*;
 
 public class VideoFrameClassifier {
 
-    private volatile Mat[] v = new Mat[1];
+    private volatile Mat[] mat = new Mat[1];
     private String windowName;
 
+    /**
+     * Driver Class
+     * Call: java -jar IR VideoFrameClassifier.jar [path to a video file]
+     * @param args arguments
+     * @throws IOException if path value could not be read
+     */
     public static void main(String[] args) throws java.lang.Exception {
 
         if(args.length != 1) {
@@ -29,7 +35,12 @@ public class VideoFrameClassifier {
         new VideoFrameClassifier().startRealTimeVideoDetection(videoPath);
     }
 
-    public void startRealTimeVideoDetection(String videoFileName) throws java.lang.Exception {
+    /**
+     * Captures the frame from video and tries to predict the pre-labelled object present.
+     * @param videoFileName path of the video file
+     * @throws Exception
+     */
+    public void startRealTimeVideoDetection(String videoFileName) throws Exception {
 
         windowName = "Video Frame Classification";
         FFmpegFrameGrabber frameGrabber = new FFmpegFrameGrabber(videoFileName);
@@ -43,9 +54,9 @@ public class VideoFrameClassifier {
             for(int i = 1; i < frameGrabber.getLengthInFrames(); i+=(int)frameRate) {
                 frameGrabber.setFrameNumber(i);
                 frame = frameGrabber.grab();
-                v[0] = new OpenCVFrameConverter.ToMat().convert(frame);
-                TinyYoloModel.getINSTANCE().markWithBoundingBox(v[0], frame.imageWidth, frame.imageHeight, true, windowName);
-                imshow(windowName, v[0]);
+                mat[0] = new OpenCVFrameConverter.ToMat().convert(frame);
+                TinyYoloModel.getInstance().markWithBoundingBox(mat[0], frame.imageWidth, frame.imageHeight, true, windowName);
+                imshow(windowName, mat[0]);
 
                 char key = (char) waitKey(20);
                 // Exit on escape:
