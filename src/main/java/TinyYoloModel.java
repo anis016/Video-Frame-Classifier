@@ -17,7 +17,7 @@ import static org.bytedeco.javacpp.opencv_highgui.imshow;
 import static org.bytedeco.javacpp.opencv_imgproc.putText;
 import static org.bytedeco.javacpp.opencv_imgproc.rectangle;
 
-
+// src: https://github.com/klevis/AutonomousDriving/blob/master/src/main/java/ramo/klevis/TinyYoloPrediction.java
 public class TinyYoloModel {
 
     private ComputationGraph model;
